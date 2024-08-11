@@ -1,4 +1,4 @@
-# ICL_ML_PortfolioProject_2024
+# ICL ML Portfolio Project 2024
 Portfolio Project for the Imperial College London Machine Learning course, 2024
 
 ## Overview
