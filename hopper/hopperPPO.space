@@ -1,0 +1,28 @@
+{
+    "physicalModel": "hopper",
+    "name" : "hopperPPO_2",
+    "technique" : "ppo",
+    "nSteps": 100000,
+    "nEpochs" : 25,
+    "params" : {
+        "comment": "Fixing size of networks from last pass.",
+        "seed" : 1,
+        "actor.varianceScale": 0.45,
+        "actor.discountFactor": 0.995,
+        "actor.hiddenActivation" : "ELU",
+        "actor.hiddenSize" : 256,
+        "actor.varianceScale" : 0.2,
+        "actor.nHidden" : 2,
+        "critic.hiddenSize" : 100,
+        "critic.nHidden" : 2,
+        "actor.learningRate": 0.00024057170086583238,
+        "critic.learningRate": 0.0002455968380598673,
+        "critic.hiddenActivation" : "ELU",
+        "targetKL" : 0.015
+    },
+    "paramSpace" : {
+        "seed" : [1, 2, 3],
+        "critic.hiddenActivation" : ["ELU", "leakyReLU"],
+        "actor.hiddenActivation" : ["ELU", "leakyReLU"]
+    }
+}

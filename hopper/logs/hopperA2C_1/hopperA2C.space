@@ -1,0 +1,28 @@
+{
+    "physicalModel": "hopper",
+    "name" : "hopperA2C_1",
+    "technique" : "a2c",
+    "nSteps": 1500000,
+    "nEpochs" : 3000,
+    "params" : {
+        "actor.learningRate": 0.001,
+        "actor.nHidden": 2,
+        "actor.hiddenSize": 128,
+        "actor.hiddenActivation": "ReLU",
+        "actor.varianceScale": 0.44,
+        "actor.varianceScaleDelta": 0.0,
+        "critic.learningRate": 0.005,
+        "critic.nHidden": 2,
+        "critic.hiddenSize": 64,
+        "critic.hiddenActivation": "ReLU",
+        "lambda": 0.97,
+        "discountFactor": 0.99,
+        "maxEpisodeLength": 1000,
+        "seed": 12,
+        "actor.discountFactor": 0.99
+    },
+    "paramSpace" : {
+        "seed" : [1, 2, 3, 5, 8, 13, 21, 34],
+        "actor.varianceScale": {"min" : 0.3, "max" : 0.6}
+    }
+}

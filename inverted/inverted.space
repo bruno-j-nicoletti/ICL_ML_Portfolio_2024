@@ -1,0 +1,20 @@
+{
+    "physicalModel": "invertedPendulum",
+    "name" : "testInverted",
+    "technique" : "reinforce",
+    "nSteps": 100000,
+    "params" : {
+        "seed" : 1,
+        "policy.learningRate":  0.001,
+        "policy.discountFactor": 0.99,
+        "policy.nHiddenLayers" : 2,
+        "policy.hiddenActivation" : "ELU",
+        "InvertedPendulum/speedPenalty" : 0.1,
+        "baseline": "white"
+    },
+    "paramSpace" : {
+        "policy.hiddenSize" : {"min" : 16, "max":64, "log":true},
+        "policy.hiddenActivation" : ["ReLU", "ELU"],
+        "policy.learningRate" : {"min" : 0.001, "max": 0.01, "log":true}
+    }
+}
