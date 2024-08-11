@@ -10,6 +10,7 @@ __all__ = ["Agent"]
 
 
 class Agent(Protocol):
+    """Protocol for an agent"""
 
     def modelSpec(self) -> PhysicalModelSpec:
         """Get the model spec we are training."""

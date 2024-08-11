@@ -14,7 +14,7 @@ _kModelName = "HalfCheetah-v4"
 
 ################################################################################
 class HalfCheetahSpec(PhysicalModelSpec):
-    """Specification for our hopper."""
+    """Specification for the half cheetah."""
 
     def __init__(self) -> None:
         self.env = self.makeEnv()

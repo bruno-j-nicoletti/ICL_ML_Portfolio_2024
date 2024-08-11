@@ -20,12 +20,15 @@ def test(physicalModelSpec: PhysicalModelSpec,
          nFrames: int,
          deterministic: bool = True) -> Dict[str, float]:
     """Test the policy net and return a score."""
+    # make a clean environment and rewarder
     env = physicalModelSpec.makeEnv()
     rewarder = physicalModelSpec.rewarder(params)
     policyNet.eval()
+
     seed = params.get("seed", 1)
     assert isinstance(seed, int)
     rewards: List[float] = []
+    # run it for the given number of episodes
     for e in range(nEpisodes):
         run = Trajectory(seed + e,
                          env,
@@ -35,4 +38,5 @@ def test(physicalModelSpec: PhysicalModelSpec,
                          deterministic=deterministic)
         reward = physicalModelSpec.adjustScore(env, run.totalReward)
         rewards.append(reward)
+    # compute a score from all the trajectories
     return computeScore(rewards)

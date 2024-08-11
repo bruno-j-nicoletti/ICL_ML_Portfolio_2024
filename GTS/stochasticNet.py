@@ -120,6 +120,7 @@ class StochasticNetLearnedSD(StochasticNet):
 
     @staticmethod
     def load(path: str) -> "ParametricNet":
+        """Load it from a path"""
         values = torch.load(path)
         return ParametricNet.loadFromDict(values)
 
@@ -211,6 +212,7 @@ class StochasticNetFixedSD(StochasticNet):
 
     @staticmethod
     def load(path: str) -> "ParametricNet":
+        """Load it from a path"""
         values = torch.load(path)
         return ParametricNet.loadFromDict(values)
 

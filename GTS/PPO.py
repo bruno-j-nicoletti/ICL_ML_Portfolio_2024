@@ -24,6 +24,7 @@ __all__ = ["PPO"]
 
 
 def discountedSum(values: np.ndarray, discount: float) -> np.ndarray:
+    """Computes the discounted sum of future values"""
     result = np.zeros(len(values), dtype=np.float32)
     runningDiscount = 0.0
     for t in reversed(range(len(values))):

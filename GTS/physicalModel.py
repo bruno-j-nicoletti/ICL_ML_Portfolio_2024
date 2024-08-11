@@ -48,6 +48,10 @@ class Rewarder:
 
     def step(self, env: Any,
              action: Any) -> Tuple[np.ndarray, float, bool, bool, dict]:
+        """
+        Run the step function of the env on the action, but overriding
+        rewards with out own tweaks.
+        """
         self.preStep(env, action)
         result = env.step(action)
         state, _, _, _, info = result

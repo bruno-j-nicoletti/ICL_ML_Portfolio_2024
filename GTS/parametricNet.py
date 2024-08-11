@@ -36,20 +36,24 @@ def asTensor(values: Observations) -> torch.Tensor:
 
 @dataclasses.dataclass
 class HiddenLayers:
+    """Definition of the hidden layers in a parametric net"""
     nLayers: int
     size: int
     activation: Activation | str
 
     def toJSON(self) -> str:
+        """Save this to JSON"""
         return json.dumps(dataclasses.asdict(self), indent=2)
 
     @classmethod
     def fromJSON(cls, s: str) -> "HiddenLayers":
+        """Load this from JSON"""
         d = json.loads(s)
         return cls(**d)
 
     @staticmethod
     def fromDict(params: ParamDict, namespace: str) -> "HiddenLayers":
+        """Load this from a dict, using namespace """
         nLayers = params[namespace + ".nHidden"]
         assert isinstance(nLayers, int)
         layerSize = params[namespace + ".hiddenSize"]

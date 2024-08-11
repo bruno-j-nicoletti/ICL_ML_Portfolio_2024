@@ -23,6 +23,9 @@ def play(physicalModelSpec: PhysicalModelSpec,
          nFrames: int = 1000,
          loops: int = 2,
          breakOnTermination: bool = False) -> None:
+    """
+    Display a live simulation in a window, or record a video of the simulation.
+    """
 
     policy.eval()
 

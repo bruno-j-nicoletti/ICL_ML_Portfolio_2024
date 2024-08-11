@@ -8,16 +8,17 @@ from collections.abc import Sequence
 __all__ = ["ParamType", "ParamDict", "printParams"]
 
 ################################################################################
-# what a parameter cane
+# what a parameter can be
 ParamType = Union[int, float, str]
 
 ################################################################################
-# instances of a set of actualised parameters
+# A set of parameters
 ParamDict = Dict[str, ParamType]
 
 
 ################################################################################
 def printParams(params: ParamDict | None) -> None:
+    # dump params to stdout
     if params:
         print(f"Params...")
         for k, v in params.items():
@@ -26,11 +27,12 @@ def printParams(params: ParamDict | None) -> None:
 
 ################################################################################
 def bakeParams(params: ParamDict, paramSpecs: ParamDict) -> ParamDict:
-    """For a given set of parms, and their defaults, bake them into
-    a final set of params.
+    """
+    :param: params -  the parameters that have been setf by a used
+    :param: paramSpecs - the params we are need and defaults values
 
-    :param: params - the set of params to pull from
-    :paramSpecs: the param definitions and their defaults
+    Generate a set of parameters, where if a value is not in params but is found
+    it paramSpecs, that will be used as a default
     """
     result: ParamDict = {}
     for k, defaultV in paramSpecs.items():

@@ -45,7 +45,7 @@ class Reinforce:
                  params: ParamDict) -> None:
         """ Reinforcement algorithm to train a mujoco simulation
         :param : physicalModelSpec - the model we are training
-        :param : params - a dict of hyper params
+        :param : params - a dict of hyper params, see _paramSpecs for what is used
         """
         self._abort = False
 
@@ -122,6 +122,7 @@ class Reinforce:
         return "REINFORCE"
 
     def train(self, logger: Logger | None = None, **kwargs: Any) -> None:
+        # train the policy network
         nSteps = cast(int, kwargs.get("nSteps", 50))
 
         if logger:
