@@ -21,6 +21,7 @@ class HopperRewarder(Rewarder):
     """Reward computer."""
 
     def __init__(self, params: ParamDict) -> None:
+        # grab hyper params that affect our reward
         self.forwardRewardWeight = cast(
             float, params.get(_FORWARD_REWARD_WEIGHT, 1.0))
         self.minimumSpeed = cast(float, params.get(_FORWARD_REWARD_MINIMUM,
@@ -30,6 +31,7 @@ class HopperRewarder(Rewarder):
 
     def postStep(self, env: Any, action: np.ndarray,
                  result: Tuple) -> Tuple[float, bool, bool]:
+        # tweak rewards after the environment has been stepped
         observation, _, terminated, truncated, info = result
 
         speed = info['x_velocity']
@@ -57,21 +59,27 @@ class HopperSpec(PhysicalModelSpec):
                 *,
                 params: ParamDict = {},
                 **constructionArgs: Any) -> Any:
+        # make an environment with the given hyper params and optional constuction args
         return gym.make(_kModelName, **constructionArgs)
 
     def rewarder(self, params: ParamDict) -> HopperRewarder:
+        # make our rewarder
         return HopperRewarder(params)
 
     def nActions(self) -> int:
+        # number of actions
         return self.env.action_space.shape[0]
 
     def actionRanges(self) -> Sequence[Tuple[float, float]]:
+        # ranges of those actions
         return [(-1, 1), (-1, 1), (-1, 1)]
 
     def nObservations(self) -> int:
+        # number of observations
         return self.env.observation_space.shape[0]
 
     def id(self) -> PhysicalModelID:
+        # id of this physical model
         return PhysicalModelID.hopper
 
     def adjustScore(self, env: Any, score: float) -> float:

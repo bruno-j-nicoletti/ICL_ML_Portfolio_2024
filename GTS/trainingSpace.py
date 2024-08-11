@@ -11,8 +11,10 @@ from .physicalModel import PhysicalModelID
 __all__ = ["TrainingSpace"]
 
 ################################################################################
-# the space for all our hyper parameters
-# if a list, it is categorical, for a
+# The dict that defines hyper params to search ove
+# each entry is either..
+#   - a list of values, which will be used categorially
+#   - a dict contain "min", "max" and optionaly "log" (True|False) and "step"
 ParamSpace = Dict[str, List | Dict[str, ParamType | bool]]
 
 
@@ -20,8 +22,8 @@ ParamSpace = Dict[str, List | Dict[str, ParamType | bool]]
 @dataclasses.dataclass
 class TrainingSpace:
     """How to train an agent over a given paramter space."""
-    physicalModel: PhysicalModelID
-    name: str  # name of this training pass
+    physicalModel: PhysicalModelID  # id of the model
+    name: str  # name of this training space and corresponding optuna study
     technique: str  # one of 'reinforce' or 'ppo'
     nSteps: int  # the number of training steps to run
     nEpochs: int = 50  # the number of training epochs to run
@@ -30,12 +32,17 @@ class TrainingSpace:
         default_factory=dict)  # param space
 
     def bake(self, trial: optuna.trial.Trial) -> TrainingSpec:
-        """Bake our param space into a single set of hyper params for the given trial."""
+        """
+        Sample our hyper parameter space from the optuna trial and combine those
+        with the fixed hyper parameters to make a TrainingSpec
+        """
         bakedParams: ParamDict = copy.deepcopy(self.params)
         for pName, pSpec in self.paramSpace.items():
             if isinstance(pSpec, list):
+                # list is categorical
                 bakedParams[pName] = trial.suggest_categorical(pName, pSpec)
             elif isinstance(pSpec, dict):
+                # dict is a range
                 step: float | int | None
                 mini: float | int = pSpec["min"]  # type: ignore
                 maxi: float | int = pSpec["max"]  # type: ignore
@@ -63,9 +70,11 @@ class TrainingSpace:
         return TrainingSpec(self.physicalModel, self.technique, bakedParams)
 
     def toJSON(self) -> str:
+        # save to a JSON string
         return json.dumps(dataclasses.asdict(self), indent=2)
 
     @classmethod
     def fromJSON(cls, s: str) -> "TrainingSpace":
+        # load from a JSON string
         d = json.loads(s)
         return cls(**d)

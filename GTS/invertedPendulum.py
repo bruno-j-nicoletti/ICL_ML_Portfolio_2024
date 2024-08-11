@@ -17,10 +17,12 @@ class InvertedPendulumRewarder(Rewarder):
     """Reward computer."""
 
     def __init__(self, params: ParamDict) -> None:
+        # grab hyper params that affect our reward
         self.speedPenalty = params.get(_SPEED_PENALTY, 0)
 
     def postStep(self, env: Any, action: np.ndarray,
                  result: Tuple) -> Tuple[float, bool, bool]:
+        # tweak rewards after the environment has been stepped
         observation, reward, terminated, truncated, info = result
 
         # punish the cart moving too fast, which is obs[2]
@@ -38,7 +40,7 @@ _kModelName = "InvertedPendulum-v4"
 
 ################################################################################
 class InvertedPendulumSpec(PhysicalModelSpec):
-    """Specification for our hopper."""
+    """Specification for our inverted pendulum."""
 
     def __init__(self) -> None:
         self.env = self.makeEnv()
@@ -47,6 +49,7 @@ class InvertedPendulumSpec(PhysicalModelSpec):
                 *,
                 params: ParamDict = {},
                 **constructionArgs: Any) -> Any:
+        # make an environment with the given hyper params and optional constuction args
         return gym.make(_kModelName, **constructionArgs)
 
     def rewarder(self, params: ParamDict) -> InvertedPendulumRewarder:
