@@ -19,6 +19,7 @@ def interrupt_handler(signum, frame):
 
 
 def setSeed(seed: Any) -> None:
+    # resets seeds across everything
     assert isinstance(seed, int)
     torch.manual_seed(seed)
     random.seed(seed)
@@ -60,21 +61,16 @@ def main():
                         help="How often to write a check point.")
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('--nosaveoninterrupt', action='store_true')
-    parser.add_argument(
-        '-p',
-        "--param",
-        nargs="*",
-        help="""override a param in the .spec file, eg -p whiteBaseline:true"""
-    )
 
     args = parser.parse_args()
 
     try:
-        # try it as a checkpoint
+        # try loading it as a checkpoint first
         agent = GTS.loadAgentFromFile(args.spec)
         modelSpec = agent.modelSpec()
         setSeed(agent.params().get("seed", 1))
     except:
+        # now try as a json file holding a training spec
         with open(args.spec, 'r') as file:
             trainingSpec = GTS.TrainingSpec.fromJSON(file.read())
         setSeed(trainingSpec.params.get("seed", 1))
@@ -91,12 +87,15 @@ def main():
     gTheAgent = agent
     signal.signal(signal.SIGINT, interrupt_handler)
     print(f"Training {args.spec} with {agent.agentName()}")
+
+    # train it
     agent.train(logger=logger,
                 nSteps=args.steps,
                 nEpochs=args.epochs,
                 stepsPerEpoch=args.steps // args.epochs,
                 checkpoints=args.checkpoints,
                 checkpointInterval=args.checkinterval)
+    # score it
     testScores = GTS.test(agent.modelSpec(),
                           agent.policyNetwork(),
                           params,
@@ -106,6 +105,7 @@ def main():
     agent.setScore(testScores)
     print(f"SCORE IS {testScores}")
 
+    # save it
     if not agent.aborted() or not args.nosaveoninterrupt:
         agent.save(args.output)
 

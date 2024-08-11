@@ -27,6 +27,7 @@ def makeAgentFromSpec(trainingSpec: TrainingSpec) -> Agent:
     else:
         assert False, f"Unknown training technique {trainingSpec.technique}"
 
+
 def loadAgentFromDict(values: Dict[str, Any]) -> Agent:
     """Load an agent from a dict that was previously serialised."""
     agentName = values.get("agent", values["trainer"]).lower()

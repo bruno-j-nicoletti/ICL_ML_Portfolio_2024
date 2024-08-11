@@ -23,21 +23,29 @@ def resolveStorage(storage: str) -> str:
 
 ################################################################################
 def minion(args: argparse.Namespace) -> None:
-    """Run in minion mode, which does the training."""
+    """Run in minion mode, which runs trial, possibly as a sub process."""
+
+    # load the training space
     with open(args.space, 'r') as file:
         trainingSpace = GTS.TrainingSpace.fromJSON(file.read())
 
+    # get the optuna study
     study = optuna.load_study(study_name=trainingSpace.name,
                               storage=resolveStorage(args.storage))
 
+    # gh
     modelSpec = GTS.fetchPhysicalModelSpec(trainingSpace.physicalModel)
 
     def objective(trial: optuna.trial.Trial) -> float:
+        # the objective function optuna uses for scoring
+
+        # bake out a training spec from the space of hyper params
         trainingSpec = trainingSpace.bake(trial)
         params = trainingSpec.params
         trial.set_user_attr("GTS_PARAMS", params)
         trial.set_user_attr("GTS_SPEC", trainingSpec.toJSON())
 
+        # start logging
         logdir = f"{args.logdir}/{trainingSpace.name}"
         logger = GTS.Logger(logdir, f"trial_{trial.number}")
 
@@ -48,6 +56,7 @@ def minion(args: argparse.Namespace) -> None:
             random.seed(seed)
             np.random.seed(seed)
 
+            # make an agent from the hyper params and train it
             agent = GTS.makeAgentFromSpec(trainingSpec)
             nSteps = trainingSpace.nSteps
             nEpochs = trainingSpace.nEpochs
@@ -57,6 +66,7 @@ def minion(args: argparse.Namespace) -> None:
                         nEpochs=nEpochs,
                         stepsPerEpoch=stepsPerEpoch)
 
+            # score the result
             testScores = GTS.test(agent.modelSpec(), agent.policyNetwork(),
                                   params, 50, 500)
             score = testScores["score"]
@@ -76,12 +86,13 @@ def minion(args: argparse.Namespace) -> None:
             print(trainingSpec.toJSON())
             return 0.0
 
+    # run a trials using our objective function
     study.optimize(objective, n_trials=args.nTrials)
 
 
 ################################################################################
 async def runMinion(i: int, args: argparse.Namespace) -> None:
-    """Run a minion in a subprocess"""
+    """Run a subprocess """
     proc = await asyncio.create_subprocess_exec("./paramSearch.py", "-m", "-l",
                                                 args.logdir,
                                                 args.space, args.storage,
@@ -96,6 +107,7 @@ async def runMinion(i: int, args: argparse.Namespace) -> None:
 
 
 async def runMinions(args: argparse.Namespace) -> None:
+    # run all our subprocess minions
     minions = []
     for i in range(args.nThreads):
         minions.append(runMinion(i, args))
@@ -116,40 +128,50 @@ def main():
         "storage",
         type=str,
         default="b",
-        help="""The sqlite file to hold the values (or mysql db URL)""")
+        help=
+        """The sqlite file to hold the optuna trials (or mysql URL). It will be created if it doesn't exist."""
+    )
     parser.add_argument("nTrials",
                         type=int,
                         default=20,
                         help="The number of trials to run per thread")
-    parser.add_argument("-n",
-                        "--nThreads",
-                        type=int,
-                        default=1,
-                        help="The number of threads to use.")
+    parser.add_argument(
+        "-n",
+        "--nThreads",
+        type=int,
+        default=1,
+        help="The number of threads to use, only one will be used for A2C.")
     parser.add_argument('-m',
                         '--minion',
                         action='store_true',
-                        help="Run in minion mode.")
-    parser.add_argument('-s',
-                        '--sampler',
-                        type=str,
-                        default="TPE",
-                        help="How to sample param space [random|TPE].")
-    parser.add_argument('-l',
-                        '--logdir',
-                        type=str,
-                        default="logs",
-                        help="Run in minion mode.")
+                        help="Run a minion, !Don't use this directly!.")
+    parser.add_argument(
+        '-s',
+        '--sampler',
+        type=str,
+        default="TPE",
+        help="How to sample the hyper parameter space [random|TPE].")
+    parser.add_argument(
+        '-l',
+        '--logdir',
+        type=str,
+        default="logs",
+        help=
+        "The directory to write logs and checkpoints into (it will make a sub directly with the name of the training space"
+    )
     parser.add_argument(
         '--reset',
         action='store_true',
-        help="Reset the optuna storage, destroying all previous trial data.")
+        help=
+        "Reset the optuna storage, destroying all previous trial data for the training space."
+    )
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
     if args.minion:
         # don't have torch multithread as we will be running trials in parallel
-        # and we will get higher throughput if we single thread torch
+        # and we will get higher throughput if we single thread torch, but run N trials
+        # in parallel
         torch.set_num_threads(1)
         minion(args)
     else:
@@ -170,6 +192,7 @@ def main():
         # attempt to load the study
         study: optuna.study.Study | None = None
 
+        # what is our storage
         storage = resolveStorage(args.storage)
 
         if args.reset:
@@ -187,22 +210,25 @@ def main():
             except:
                 pass
 
+        # make study?
         if not study:
             sampler: optuna.samplers.BaseSampler | None = None
             if args.sampler.lower() == "random":
                 sampler = optuna.samplers.RandomSampler()
-
             study = optuna.create_study(
                 study_name=trainingSpace.name,
                 storage=storage,
                 direction=optuna.study.StudyDirection.MAXIMIZE,
                 sampler=sampler)
 
+        # make a log dir?
         if not os.path.exists(logdir):
             os.makedirs(logdir)
             shutil.copy(args.space, logdir)
 
         print(f"Dispatching over {nThreads} thread.")
+
+        # dispatch minion processes if nThreads > 1
         if nThreads > 1:
             asyncio.run(runMinions(args))
         else:
