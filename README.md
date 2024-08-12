@@ -180,7 +180,7 @@ The most successful model can be played with,
 ./play.py hopper/hopperA2C.checkpoint
 ```
 
-I include its training spec [hopper/hopperA2C.spec](hopper/hopperA2C.spec) and one of the hyper parameter spaces I used to train it [hopper/hopperA2C.space](hopper/hopperA2C.space. I’ve also saved the logs and specs of that exploration session in [hopper/logs/hopperA2C_1](hopper/logs/hopperA2C_1). 
+I include its training spec [hopper/hopperA2C.spec](hopper/hopperA2C.spec) and one of the hyper parameter spaces I used to train it [hopper/hopperA2C.space](hopper/hopperA2C.space). I’ve also saved the logs and specs of that exploration session in [hopper/logs/hopperA2C_1](hopper/logs/hopperA2C_1). 
 
 I’ve included checkpoints for PPO and REINFORCE, none of which succeeded. You can play these. For comedy value, you can look at a few failures (using the `-k` option to keep the simulation running after the it falls over).
 ```
