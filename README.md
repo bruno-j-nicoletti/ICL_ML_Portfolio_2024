@@ -205,7 +205,7 @@ An example of a poor PPO training result, that resembles a stumble, is...
 ## Reflection
 The purpose of my project was bring together strands of the machine learning course to build a prototype system to train simulated models of figures then to use it to train a range of neural networks.
 
-There are existing training systems for Gymnasium, [stable-baseline3](https://github.com/DLR-RM/stable-baselines3) works very well and provides baseline implementations to check your results against. It is orders of magnitude faster and more accurate than what I came up with. However, just using baseline3 to train networks defeats the object of my project. Were I to do this professionally I would look closely at baseline3 and other systems and use that under an appropriate license instead of home brewing it all.
+There are existing training systems, for example Gymnasium, [stable-baseline3](https://github.com/DLR-RM/stable-baselines3) works very well and provides baseline implementations to check your results against. It is orders of magnitude faster and more accurate than what I came up with. However, just using baseline3 to train networks defeats the object of my project. Were I to do this professionally I would look closely at baseline3 and other systems and use that under an appropriate license instead of home brewing it all.
 
 ### What I did well
 I’m happy with the following...
